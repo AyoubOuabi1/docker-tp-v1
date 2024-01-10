@@ -1,4 +1,4 @@
-FROM node:alpine3.18
+FROM node:18.13.0 as build
 
 WORKDIR /app
 
@@ -6,8 +6,14 @@ COPY package*.json ./
 
 RUN npm install
 
+RUN npm install -g @angular/cli
+
 COPY . .
 
-EXPOSE 4200
+RUN ng build --configuration=production
 
-CMD ["npm", "start"]
+FROM nginx:latest
+
+COPY --from=build app/dist/aftas-angular /usr/share/nginx/html
+
+EXPOSE 80
